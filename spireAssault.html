@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<head>
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="fonts/icomoon/style.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css?35" />
+
+
+</head>
+
+<body>
+
+	<script type="text/javascript" src="lz-string.js" >
+</script>
+
+	<script type="text/javascript" src="spireAssault.js" >
+</script>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6">
+
+				<textarea id="saveString" oninput="parse()"></textarea>
+			
+				<div>
+					<label style="color:white">Choose how many battles to simulate.<br> Higher numbers result in more stable values but take longer to calculate</label><br>
+					<select id="battleCounter" onchange="changeBattleCount()">
+						<option value="200">200
+						</option>
+						<option value=500>500</option>
+						<option value=1000>1000</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-6 niceScroll">
+				<div id="performance" style="color:white"></div>
+			</div>
+		</div>
+		<div class="row">
+			<div id="tooltipDiv" class="tooltipExtraNone">
+				<div id="tipTitle"></div>
+				<hr/>
+				<div id="tipText"></div>
+				<hr/>
+				<div id="tipCost"></div>
+			</div>
+		</div>
+	</div>
+</body>
