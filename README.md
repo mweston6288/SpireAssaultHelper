@@ -16,3 +16,4 @@ This tool is still in an early Beta so bugs abound.
 
 *The tool does not reset if you add a new save file. Please refresh the page before loading another save file
 *Tool adds dust based on outcome of simulations. It will print the wrong amount of dust
+*I've only reach U2 z100 and SA 20 on my save file so I don't know what happens beyond that.
