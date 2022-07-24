@@ -9,6 +9,8 @@ By default, the helper will simulate 200 battles in Spire Assault with your curr
 
 You can also set the tool to simulate 500 or 1,000 battles. This will better stabilize the DpS and efficiency calculations but will take more time to calculate.
 
+Finally, clicking the "Guess for better" button will make it run 100 random setups and it will equip the best set it found
+
 Other than that, you can fiddle around with the SA simulation as if it was a real game.
 
 ## Known Issues

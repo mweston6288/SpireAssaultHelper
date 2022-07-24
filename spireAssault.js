@@ -1,5 +1,8 @@
+var game
 var OwnedItems = [];
 var battleCount = 200;
+var bestSet = {dps: 0, items:[]}
+var trialSet = []
 function parse(){
 	game = JSON.parse(LZString.decompressFromBase64((document.getElementById("saveString").value.replace(/(\r\n|\n|\r|\s)/gm,"") )));
 	autoBattle.load()
@@ -9,8 +12,10 @@ function parse(){
 			OwnedItems.push(item);
 		}
 	}
+
     simulate();
     calcBest();
+
 }
 function changeBattleCount(){
     battleCount = document.getElementById("battleCounter").value
@@ -18,12 +23,10 @@ function changeBattleCount(){
 }
 function simulate(){
     autoBattle.count = 0;
+    autoBattle.resetStats();
     while(autoBattle.count < battleCount){
         autoBattle.update();
     }
-}
-function breakTheGame(){
-    autoBattle.dust = Infinity;
 }
 function calcBest(){
     var efficiencies = [];
@@ -37,7 +40,6 @@ function calcBest(){
             continue
         }
         autoBattle.items[OwnedItems[item]].level++
-        autoBattle.resetStats();
         simulate();
         var percent = (autoBattle.getDustPs() - initdps) / autoBattle.upgradeCost(OwnedItems[item]);
         if(percent > BiggestPercent) BiggestPercent = percent;
@@ -58,6 +60,53 @@ function calcBest(){
     }
     autoBattle.popup()
 }
+function searchForBetter(){
+    var equipped = [];
+    var bestdps = autoBattle.getDustPs()
+    for(item in OwnedItems){
+        if(autoBattle.items[OwnedItems[item]].equipped)
+        equipped.push(OwnedItems[item])
+    }
+    var perm = Array(OwnedItems.length)
+    for(var i = 0; i < perm.length;i++){
+        perm[i] = i
+    }
+    for(var j = 0; j < 100; j++){
+
+        for(item in OwnedItems){
+            autoBattle.items[OwnedItems[item]].equipped = false
+        }
+        for(var i = autoBattle.getMaxItems() - 1; i >= 0; i--){
+            var rand = Math.floor(Math.random() * OwnedItems.length)
+            var temp = perm[perm.length - 1 - i]
+            perm[perm.length - 1 - i] = perm[rand];
+            perm[rand] = temp
+        }
+        for(var i = autoBattle.getMaxItems() - 1; i >= 0; i--){
+            autoBattle.items[OwnedItems[perm[perm.length - 1 - i]]].equipped = true
+        }
+        simulate();
+        if (autoBattle.getDustPs() > bestdps){
+            bestdps = autoBattle.getDustPs()
+            equipped = []
+            for(item in OwnedItems){
+                if(autoBattle.items[OwnedItems[item]].equipped)
+                equipped.push(OwnedItems[item])
+            }
+        }
+    }
+    for(item in OwnedItems){
+        autoBattle.items[OwnedItems[item]].equipped = false
+    }
+    for(item in equipped){
+        autoBattle.items[equipped[item]].equipped = true
+    }
+    calcBest()
+    simulate()
+    autoBattle.popup();
+}
+
+
 
 function getRandomIntSeeded(seed, minIncl, maxExcl) {
 	var toReturn = Math.floor(seededRandom(seed) * (maxExcl - minIncl)) + minIncl;
