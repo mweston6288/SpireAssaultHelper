@@ -35,7 +35,7 @@ function calcBest(){
     var BiggestPercent = 0;
     var perfDiv = document.getElementById("performance");
     for(item in OwnedItems){
-        if(!autoBattle.items[OwnedItems[item]].equipped){
+        if(!autoBattle.items[OwnedItems[item]].equipped || autoBattle.items[OwnedItems[item]].noUpgrade){
             efficiencies.push(0);
             continue
         }
@@ -55,7 +55,7 @@ function calcBest(){
             continue
         }
         var newDiv = document.createElement("div");
-        newDiv.innerHTML = OwnedItems[values] + " "+ (efficiencies[values] <= 0 ? 0 : efficiencies[values].toFixed(2)) + "%"
+        newDiv.innerHTML = OwnedItems[values] + " "+ (efficiencies[values] <= 0  || Number.isNaN(efficiencies[values]) ? 0 : efficiencies[values].toFixed(2)) + "%"
         perfDiv.appendChild(newDiv);
     }
     autoBattle.popup()
