@@ -14,6 +14,7 @@ function parse(){
 }
 function changeBattleCount(){
     battleCount = document.getElementById("battleCounter").value
+    calcBest();
 }
 function simulate(){
     autoBattle.count = 0;
