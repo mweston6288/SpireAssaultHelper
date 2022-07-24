@@ -55,7 +55,7 @@ function calcBest(){
         newDiv.innerHTML = OwnedItems[values] + " "+ (efficiencies[values] <= 0 ? 0 : efficiencies[values].toFixed(2)) + "%"
         perfDiv.appendChild(newDiv);
     }
-
+    autoBattle.popup()
 }
 
 function getRandomIntSeeded(seed, minIncl, maxExcl) {

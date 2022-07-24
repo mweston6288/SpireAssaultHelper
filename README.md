@@ -15,6 +15,4 @@ Other than that, you can fiddle around with the SA simulation as if it was a rea
 This tool is still in an early Beta so bugs abound.
 
 *The tool does not reset if you add a new save file. Please refresh the page before loading another save file
-*Changing the enemy level may cause the simulation to fail. Changing your equipment should fix the issue
-*I tried adding infinite dust but it doesn't work as intended. I'll probably have to replace it with a tracker saying how much excess dust you've used
-*The tool uses huge amounts of RAM. It's more than likely because it does several hundreds of edits and garbage collection kinda gets overloaded. Once I have the main functions working, I can focus on efficiency
+*Tool adds dust based on outcome of simulations. It will print the wrong amount of dust

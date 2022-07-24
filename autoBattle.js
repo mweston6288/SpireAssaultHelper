@@ -274,7 +274,7 @@ var autoBattle = {
             }
             this.presets[slot].push(ringMods);
         }
-        this.popup(true, false, true);
+        //this.popup(true, false, true);
     },
     loadPreset: function(slot){
         var preset = this.presets[slot];
@@ -306,7 +306,7 @@ var autoBattle = {
         }
         this.popupMode = 'items';
         this.resetCombat(true);
-        this.popup(true, false, true);
+        //this.popup(true, false, true);
     },
     getItemOrder: function(){
         var items = [];
@@ -354,7 +354,7 @@ var autoBattle = {
         if (setting.enabled == setting.text.length - 1) setting.enabled = 0;
         else setting.enabled++;
         if (setting.onToggle) setting.onToggle();
-        this.popup(true, false, true);
+        //this.popup(true, false, true);
     },
     settings: {
         loadHide: {
@@ -2501,7 +2501,7 @@ var autoBattle = {
         this.lootAvg.counter += this.battleTime;
         this.resetCombat();
         if (this.sessionEnemiesKilled < this.sessionTrimpsKilled) swapClass('abTab', 'abTabLosing', document.getElementById('autoBattleTab'));
-        this.popup(true, true);
+        ////this.popup(true, true);
         //this.notes += "Trimp Died. "
     },
     getDustMult: function(){
@@ -2566,7 +2566,7 @@ var autoBattle = {
         if (this.sessionEnemiesKilled > this.sessionTrimpsKilled) swapClass('abTab', 'abTabWinning', document.getElementById('autoBattleTab'));
         this.resetCombat();
         //this.checkLastActions();
-        this.popup(true, false, false, false, true);
+        ////this.popup(true, false, false, false, true);
     },
     nextLevelCount: function(){
         if (this.enemyLevel < 20) return 10 * this.enemyLevel;
@@ -2580,7 +2580,7 @@ var autoBattle = {
         // }
         for (var x = 0; x < this.speed; x++){
             this.fight();
-            this.popup(true, true);
+            ////this.popup(true, true);
             this.battleTime += this.frameTime;
         }
     },    
@@ -2626,7 +2626,8 @@ var autoBattle = {
         itemObj.equipped = !itemObj.equipped;
         if (itemObj.hidden) this.restore(item);
         this.resetCombat(true);
-        this.popup(true);
+        ////this.popup(true);
+		calcBest();
     },
     countEquippedItems: function(){
         var count = 0;
@@ -2659,7 +2660,7 @@ var autoBattle = {
         }
         bonus.level++;
         this.saveLastAction('bonus', what, cost);
-        this.popup(true, false, true);
+        //this.popup(true, false, true);
     },
     buyOneTimer: function(what){
         var bonus = this.oneTimers[what];
@@ -2675,7 +2676,7 @@ var autoBattle = {
         bonus.owned = true;
         if (bonus.onPurchase) bonus.onPurchase();
         this.saveLastAction('oneTimer', what, cost);
-        this.popup(true, false, true);
+        //this.popup(true, false, true);
     },
     hoverItem: function(item, upgrade){
         var itemObj = this.items[item];
@@ -2708,7 +2709,7 @@ var autoBattle = {
         else this.dust -= cost;
         
         itemObj.level++;
-        this.popup(false, false, true);
+        ////this.popup(false, false, true);
 		calcBest();
     },
     checkLastActions: function(){
@@ -2772,18 +2773,19 @@ var autoBattle = {
         this.resetStats();
         this.resetCombat();
         //this.checkLastActions();
-        this.popup(false, false, true);
+        //this.popup(false, false, true);
     },
     confirmUndo: false,
     confirmUndoClicked: function(){
         this.confirmUndo = !this.confirmUndo;
-        this.popup(false, false, true);
+        //this.popup(false, false, true);
     },
     levelDown: function(){
         if (this.enemyLevel > 1) {
             this.enemyLevel--;
             this.autoLevel = false;
-            this.resetCombat(true);
+            //this.resetCombat(true);
+			calcBest();
         }
         this.updatePopupBtns();
     },
@@ -2791,7 +2793,8 @@ var autoBattle = {
 
         if (this.enemyLevel < this.maxEnemyLevel){
             this.enemyLevel++;
-            this.resetCombat(true);
+            //this.resetCombat(true);
+			calcBest();
         }
         this.updatePopupBtns();
     },
@@ -2827,16 +2830,16 @@ var autoBattle = {
     toggleHideMode: function(){
         this.hideMode = !this.hideMode;
         this.popupMode = "items";
-        this.popup(false, false, true)
+        //this.popup(false, false, true)
     },
     hide: function(itemName){
         this.items[itemName].hidden = true;
         if (this.items[itemName].equipped) this.items[itemName].equipped = false;
-        this.popup(false, false, true);
+        //this.popup(false, false, true);
     },
     restore: function(itemName){
         this.items[itemName].hidden = false;
-        this.popup(false, false, true);
+        //this.popup(false, false, true);
     },
     completedVoidMap: function(zone){
         if (!this.activeContract) return;
@@ -2846,7 +2849,7 @@ var autoBattle = {
         item.owned = true;
         message("You have fulfilled your Contract, and Huffy has gained access to " + this.cleanName(this.activeContract) + "!", "Notices");
         this.activeContract = "";
-        this.popup(false,false,true);
+        //this.popup(false,false,true);
     },
     abandonContract: function(){
         if (!this.activeContract) return;
@@ -2859,7 +2862,7 @@ var autoBattle = {
         }
         this.saveLastAction('cancelContract', this.activeContract, price);
         this.activeContract = "";
-        this.popup(false,false,true);
+        //this.popup(false,false,true);
     },
     acceptContract: function(item){
         if (this.activeContract) return;
@@ -2870,7 +2873,7 @@ var autoBattle = {
         if (this.items[item].dustType == "shards") this.shards -= price;
         else this.dust -= price; 
         this.activeContract = item;
-        this.popup(false, false, true);
+        //this.popup(false, false, true);
     },
     renamePresetTooltip: function(which){
         var text = "Rename Preset " + which + "<br/><input style='width: 75%; margin-left: 12.5%' id='abPresetNameInput' value='" + this.presets.names[which - 1] + "'/>"
@@ -2951,7 +2954,7 @@ var autoBattle = {
             var randomMod = availableMods[Math.floor(Math.random() * availableMods.length)];
             this.rings.mods.push(randomMod);
         }
-        this.popup(false, false, true);
+        //this.popup(false, false, true);
     },
     getAvailableRingMods: function(){
         var availableMods = [];
@@ -2968,7 +2971,7 @@ var autoBattle = {
         if (slot > this.getRingSlots() - 1) return;
         this.rings.mods[slot] = useValue;
         this.resetCombat();
-        this.popup(false, false, true);
+        //this.popup(false, false, true);
     },
     getRingLevelCost: function(){
         return Math.ceil(15 * Math.pow(2, this.rings.level));
