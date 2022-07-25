@@ -1,18 +1,19 @@
 var game
 var OwnedItems = [];
+var efficiencies;
 var battleCount = 200;
 var bestSet = {dps: 0, items:[]}
 var trialSet = []
 function parse(){
+	var itemsList = autoBattle.getItemOrder()
 	game = JSON.parse(LZString.decompressFromBase64((document.getElementById("saveString").value.replace(/(\r\n|\n|\r|\s)/gm,"") )));
 	autoBattle.load()
     autoBattle.popup();
-	for(item in autoBattle.items){
-        if(autoBattle.items[item].owned){
-			OwnedItems.push(item);
+	for(item in itemsList){
+        if(autoBattle.items[itemsList[item].name].owned){
+			OwnedItems.push(itemsList[item].name);
 		}
 	}
-
     simulate();
     calcBest();
 
@@ -29,34 +30,69 @@ function simulate(){
     }
 }
 function calcBest(){
-    var efficiencies = [];
-    
+	efficiencies = new Array()
+	efficiencies[0] = new Array()
+	efficiencies[1] = new Array()
     var initdps = autoBattle.getDustPs();
-    var BiggestPercent = 0;
+    var BiggestDustPercent = 0;
+	var BiggestShardPercent = 0
     var perfDiv = document.getElementById("performance");
     for(item in OwnedItems){
         if(!autoBattle.items[OwnedItems[item]].equipped || autoBattle.items[OwnedItems[item]].noUpgrade){
-            efficiencies.push(0);
+            if(autoBattle.items[OwnedItems[item]].dustType === "shards"){
+				efficiencies[0].push(0);
+			}
+			else{
+				efficiencies[1].push(0);
+			}
             continue
         }
         autoBattle.items[OwnedItems[item]].level++
         simulate();
         var percent = (autoBattle.getDustPs() - initdps) / autoBattle.upgradeCost(OwnedItems[item]);
-        if(percent > BiggestPercent) BiggestPercent = percent;
-        efficiencies.push(percent)
+        
+		if(autoBattle.items[OwnedItems[item]].dustType === "shards" && percent > BiggestShardPercent) 
+			BiggestShardPercent = percent;
+		else if(autoBattle.items[OwnedItems[item]].dustType !== "shards" && percent > BiggestDustPercent)		
+			BiggestDustPercent = percent
+		
+		if(autoBattle.items[OwnedItems[item]].dustType === "shards"){
+			efficiencies[0].push(percent);
+		}
+		else{
+			efficiencies[1].push(percent);
+		}
         autoBattle.items[OwnedItems[item]].level--
     }
-    for(value in efficiencies){
-        efficiencies[value] = efficiencies[value] / BiggestPercent * 100
-    }
+	for(var i = 0, j = 0, k = 0; i < OwnedItems.length; i++){
+		if(autoBattle.items[OwnedItems[i]].dustType === "shards"){
+			efficiencies[0][j] = efficiencies[0][j] / BiggestShardPercent * 100
+			j++
+		}
+		else{
+			efficiencies[1][k] = efficiencies[1][k] / BiggestDustPercent * 100
+			k++
+		}
+	}
     perfDiv.innerHTML = ""
-    for (values in OwnedItems){
-        if(!autoBattle.items[OwnedItems[values]].equipped){
-            continue
+    for (var i = 0, j = 0, k = 0; i < OwnedItems.length; i++){
+		if(!autoBattle.items[OwnedItems[i]].equipped){
+			continue
         }
         var newDiv = document.createElement("div");
-        newDiv.innerHTML = OwnedItems[values] + " "+ (efficiencies[values] <= 0  || Number.isNaN(efficiencies[values]) ? 0 : efficiencies[values].toFixed(2)) + "%"
-        perfDiv.appendChild(newDiv);
+		var text = ""
+		text = OwnedItems[i]
+		if(autoBattle.items[OwnedItems[i]].dustType === "shards"){
+			text += " " + (efficiencies[0][j] <= 0  || Number.isNaN(efficiencies[0][j]) ? 0 : efficiencies[0][j].toFixed(2)) + "%"
+			j++
+		}
+		else{
+			text += " " + (efficiencies[1][k] <= 0  || Number.isNaN(efficiencies[1][k]) ? 0 : efficiencies[1][k].toFixed(2)) + "%"
+			k++
+		}
+		console.log(text)
+		newDiv.innerHTML = text
+		perfDiv.appendChild(newDiv);
     }
     autoBattle.popup()
 }
