@@ -311,7 +311,7 @@ var autoBattle = {
     getItemOrder: function(){
         var items = [];
         for (var item in this.items){
-            items.push({name: item, zone: (this.items[item].zone) ? this.items[item].zone : 0})
+            items.push({name: item, zone: (this.items[item].zone) ? this.items[item].zone : 0, dustType: (this.items[item].dustType === "shards" ? "shards" : "dust")})
         }
         function itemSort(a,b){
             if (a.zone > b.zone) return 1;

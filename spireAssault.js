@@ -8,15 +8,15 @@ function parse(){
 	var itemsList = autoBattle.getItemOrder()
 	game = JSON.parse(LZString.decompressFromBase64((document.getElementById("saveString").value.replace(/(\r\n|\n|\r|\s)/gm,"") )));
 	autoBattle.load()
+	autoBattle.autoLevel = false
     autoBattle.popup();
 	for(item in itemsList){
         if(autoBattle.items[itemsList[item].name].owned){
-			OwnedItems.push(itemsList[item].name);
+			OwnedItems.push(itemsList[item]);
 		}
 	}
     simulate();
     calcBest();
-
 }
 function changeBattleCount(){
     battleCount = document.getElementById("battleCounter").value
@@ -30,42 +30,44 @@ function simulate(){
     }
 }
 function calcBest(){
-	efficiencies = new Array()
-	efficiencies[0] = new Array()
-	efficiencies[1] = new Array()
+	efficiencies = new Array(2)
+	efficiencies[0] = new Array(OwnedItems.length)
+	efficiencies[1] = new Array(OwnedItems.length)
     var initdps = autoBattle.getDustPs();
     var BiggestDustPercent = 0;
 	var BiggestShardPercent = 0
     var perfDiv = document.getElementById("performance");
-    for(item in OwnedItems){
-        if(!autoBattle.items[OwnedItems[item]].equipped || autoBattle.items[OwnedItems[item]].noUpgrade){
-            if(autoBattle.items[OwnedItems[item]].dustType === "shards"){
-				efficiencies[0].push(0);
+	var i, j, k
+    for(i = 0, j = 0, k = 0; i <OwnedItems.length; i++){
+		console.log(OwnedItems[i])
+        if(!autoBattle.items[OwnedItems[i].name].equipped || autoBattle.items[OwnedItems[i].name].noUpgrade){
+            if(OwnedItems[i].dustType === "shards"){
+				efficiencies[0][j++] = 0;
 			}
 			else{
-				efficiencies[1].push(0);
+				efficiencies[1][k++] = 0;
 			}
             continue
         }
-        autoBattle.items[OwnedItems[item]].level++
+        autoBattle.items[OwnedItems[i].name].level++
         simulate();
-        var percent = (autoBattle.getDustPs() - initdps) / autoBattle.upgradeCost(OwnedItems[item]);
+        var percent = (autoBattle.getDustPs() - initdps) / autoBattle.upgradeCost(OwnedItems[i].name);
         
-		if(autoBattle.items[OwnedItems[item]].dustType === "shards" && percent > BiggestShardPercent) 
+		if(OwnedItems[i].dustType === "shards" && percent > BiggestShardPercent) 
 			BiggestShardPercent = percent;
-		else if(autoBattle.items[OwnedItems[item]].dustType !== "shards" && percent > BiggestDustPercent)		
+		else if(OwnedItems[i].dustType === "dust" && percent > BiggestDustPercent)		
 			BiggestDustPercent = percent
 		
-		if(autoBattle.items[OwnedItems[item]].dustType === "shards"){
-			efficiencies[0].push(percent);
+		if(OwnedItems[i].dustType === "shards"){
+			efficiencies[0][j++] = percent;
 		}
 		else{
-			efficiencies[1].push(percent);
+			efficiencies[1][k++] = percent;
 		}
-        autoBattle.items[OwnedItems[item]].level--
+        autoBattle.items[OwnedItems[i].name].level--
     }
-	for(var i = 0, j = 0, k = 0; i < OwnedItems.length; i++){
-		if(autoBattle.items[OwnedItems[i]].dustType === "shards"){
+	for(i = 0, j = 0, k = 0; i < OwnedItems.length; i++){
+		if(OwnedItems[i].dustType === "shards"){
 			efficiencies[0][j] = efficiencies[0][j] / BiggestShardPercent * 100
 			j++
 		}
@@ -75,14 +77,14 @@ function calcBest(){
 		}
 	}
     perfDiv.innerHTML = ""
-    for (var i = 0, j = 0, k = 0; i < OwnedItems.length; i++){
-		if(!autoBattle.items[OwnedItems[i]].equipped){
+    for (i = 0, j = 0, k = 0; i < OwnedItems.length; i++){
+		if(!autoBattle.items[OwnedItems[i].name].equipped){
 			continue
         }
         var newDiv = document.createElement("div");
 		var text = ""
-		text = OwnedItems[i]
-		if(autoBattle.items[OwnedItems[i]].dustType === "shards"){
+		text = OwnedItems[i].name
+		if(OwnedItems[i].dustType === "shards"){
 			text += " " + (efficiencies[0][j] <= 0  || Number.isNaN(efficiencies[0][j]) ? 0 : efficiencies[0][j].toFixed(2)) + "%"
 			j++
 		}
@@ -90,10 +92,10 @@ function calcBest(){
 			text += " " + (efficiencies[1][k] <= 0  || Number.isNaN(efficiencies[1][k]) ? 0 : efficiencies[1][k].toFixed(2)) + "%"
 			k++
 		}
-		console.log(text)
 		newDiv.innerHTML = text
 		perfDiv.appendChild(newDiv);
     }
+	console.log(efficiencies)
     autoBattle.popup()
 }
 function searchForBetter(){
