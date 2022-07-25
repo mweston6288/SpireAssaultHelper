@@ -3331,6 +3331,8 @@ var autoBattle = {
             var line2 = "";
             var count = 1;
             var total = 0;
+            var DustItemCount = 0
+            var ShardItemCount = 0
             for (x = 0; x < itemList.length; x++){
                 var item = itemList[x].name;
                 var itemObj = this.items[item];
@@ -3351,12 +3353,18 @@ var autoBattle = {
                         line2 += "<div class='autoItem autoItemHide' onclick='autoBattle.hide(\"" + item + "\")'>Hide</div>";
                     else if (itemObj.noUpgrade) line2 += "<div class='autoItem autoColorGrey'>Unupgradable</div>"
                     else 
-                        line2 += "<div class='autoItem autoItemUpgrade' onclick='autoBattle.upgrade(\"" + item + "\", false" + ")' onmouseover='autoBattle.hoverItem(\"" + item + "\", true)'>Upgrade (" + upgradeCost + ")</div>";
+                        line2 += "<div class='autoItem autoItemUpgrade' onclick='autoBattle.upgrade(\"" + item + "\", false" + ")' onmouseover='autoBattle.hoverItem(\"" + item + "\", true)' style=\"background-color: " + getBGColor(this.getCurrencyName(item), DustItemCount, ShardItemCount) + "\">Upgrade (" + upgradeCost + ")<br>Efficiency: " + getEfficiency(this.getCurrencyName(item), DustItemCount, ShardItemCount) + "%</div>";
                 }
                 else if (this.popupMode == "hidden")
                     line2 += "<div class='autoItem autoItemRestore' onclick='autoBattle.restore(\"" + item + "\")'>Restore</div>";
                 count++;
                 total++
+                if(itemObj.dustType === "shards"){
+                    ShardItemCount++
+                }
+                else{
+                    DustItemCount++
+                }
             }
             if (total == 0){
                 if (this.popupMode == "hidden") line1 += "<br/><b style='color: white; padding: 2%;'>You have no hidden items right now, but can hide items you're no longer using using the 'Hide Items' button above.</b>";

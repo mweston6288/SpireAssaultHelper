@@ -9,7 +9,6 @@ function parse(){
 	game = JSON.parse(LZString.decompressFromBase64((document.getElementById("saveString").value.replace(/(\r\n|\n|\r|\s)/gm,"") )));
 	autoBattle.load()
 	autoBattle.autoLevel = false
-    autoBattle.popup();
 	for(item in itemsList){
         if(autoBattle.items[itemsList[item].name].owned){
 			OwnedItems.push(itemsList[item]);
@@ -36,10 +35,8 @@ function calcBest(){
     var initdps = autoBattle.getDustPs();
     var BiggestDustPercent = 0;
 	var BiggestShardPercent = 0
-    var perfDiv = document.getElementById("performance");
 	var i, j, k
     for(i = 0, j = 0, k = 0; i <OwnedItems.length; i++){
-		console.log(OwnedItems[i])
         if(!autoBattle.items[OwnedItems[i].name].equipped || autoBattle.items[OwnedItems[i].name].noUpgrade){
             if(OwnedItems[i].dustType === "shards"){
 				efficiencies[0][j++] = 0;
@@ -68,34 +65,20 @@ function calcBest(){
     }
 	for(i = 0, j = 0, k = 0; i < OwnedItems.length; i++){
 		if(OwnedItems[i].dustType === "shards"){
-			efficiencies[0][j] = efficiencies[0][j] / BiggestShardPercent * 100
+			efficiencies[0][j] = efficiencies[0][j] / BiggestShardPercent
+			if(efficiencies[0][j] <= 0  || Number.isNaN(efficiencies[0][j])){
+				efficiencies[0][j] = 0
+			}
 			j++
 		}
 		else{
-			efficiencies[1][k] = efficiencies[1][k] / BiggestDustPercent * 100
+			efficiencies[1][k] = efficiencies[1][k] / BiggestDustPercent
+			if(efficiencies[1][k] <= 0  || Number.isNaN(efficiencies[1][k])){
+				efficiencies[1][k] = 0
+			}
 			k++
 		}
 	}
-    perfDiv.innerHTML = ""
-    for (i = 0, j = 0, k = 0; i < OwnedItems.length; i++){
-		if(!autoBattle.items[OwnedItems[i].name].equipped){
-			continue
-        }
-        var newDiv = document.createElement("div");
-		var text = ""
-		text = OwnedItems[i].name
-		if(OwnedItems[i].dustType === "shards"){
-			text += " " + (efficiencies[0][j] <= 0  || Number.isNaN(efficiencies[0][j]) ? 0 : efficiencies[0][j].toFixed(2)) + "%"
-			j++
-		}
-		else{
-			text += " " + (efficiencies[1][k] <= 0  || Number.isNaN(efficiencies[1][k]) ? 0 : efficiencies[1][k].toFixed(2)) + "%"
-			k++
-		}
-		newDiv.innerHTML = text
-		perfDiv.appendChild(newDiv);
-    }
-	console.log(efficiencies)
     autoBattle.popup()
 }
 function searchForBetter(){
@@ -143,7 +126,28 @@ function searchForBetter(){
     simulate()
     autoBattle.popup();
 }
+function getBGColor(type, dustNum, shardNum){
+	
+	var x,y,z
+	if(type === "Dust"){
+		x = 9 * efficiencies[1][dustNum]
+		y = 7 * efficiencies[1][dustNum] 
+		z = 146 * efficiencies[1][dustNum]
 
+	}
+	else{
+		x = 146 * efficiencies[0][shardNum]
+		y = 23 * efficiencies[0][shardNum] 
+		z = 7 * efficiencies[0][shardNum]
+	}
+	return "rgb(" + x + ", " + y + ", " + z + ")"
+}
+function getEfficiency(type, dustNum, shardNum){
+	if(type === "Dust"){
+		return (efficiencies[1][dustNum] * 100).toFixed(2)
+	}
+	return (efficiencies[0][shardNum] * 100).toFixed(2)
+}
 
 
 function getRandomIntSeeded(seed, minIncl, maxExcl) {
