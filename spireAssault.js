@@ -1,14 +1,16 @@
 var game
-var OwnedItems = [];
+var OwnedItems;
 var efficiencies;
 var battleCount = 200;
 var bestSet = {dps: 0, items:[]}
 var trialSet = []
 function parse(){
-	var itemsList = autoBattle.getItemOrder()
 	game = JSON.parse(LZString.decompressFromBase64((document.getElementById("saveString").value.replace(/(\r\n|\n|\r|\s)/gm,"") )));
+	console.log(game)
 	autoBattle.load()
+	var itemsList = autoBattle.getItemOrder()
 	autoBattle.autoLevel = false
+	OwnedItems = []
 	for(item in itemsList){
         if(autoBattle.items[itemsList[item].name].owned){
 			OwnedItems.push(itemsList[item]);
