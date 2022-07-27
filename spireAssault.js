@@ -18,16 +18,6 @@ function parse(){
     simulate();
     calcBest();
 
-	for(trait in generator){
-		
-		for(item in generator[trait]){
-			if(autoBattle.items[item] === undefined){
-				console.log(trait)
-				console.log(item)
-			}
-			//console.log(autoBattle.items[item])
-		}
-	}
 }
 function changeBattleCount(){
     battleCount = document.getElementById("battleCounter").value
