@@ -2537,20 +2537,20 @@ var autoBattle = {
         //if (this.sessionEnemiesKilled >= 100 && this.sessionTrimpsKilled == 0 && this.enemyLevel >= 5) giveSingleAchieve("Huffstle");
         //if (this.enemyLevel >= 20 && this.trimp.shockTime <= 0 && this.trimp.bleedTime <= 0 && this.trimp.poisonTime <= 0) giveSingleAchieve("Just Smack It");
         var amt = this.getDustReward();
-        if (this.speed == 1) {
-            this.dust += amt;
-            game.stats.saDust.value += amt;
-            if (this.enemyLevel > 50){
-                this.shardDust += amt;
-                if (this.shardDust >= 1e9){
-                    var shardAmt = Math.floor(this.shardDust / 1e9);
-                    this.shards += shardAmt;
-                    this.shardDust -= 1e9 * shardAmt;
-                    game.stats.saShards.value += shardAmt;
-                }
-            }
+        // if (this.speed == 1) {
+        //     //this.dust += amt;
+        //     game.stats.saDust.value += amt;
+        //     if (this.enemyLevel > 50){
+        //         //this.shardDust += amt;
+        //         if (this.shardDust >= 1e9){
+        //             var shardAmt = Math.floor(this.shardDust / 1e9);
+        //            // this.shards += shardAmt;
+        //             this.shardDust -= 1e9 * shardAmt;
+        //             game.stats.saShards.value += shardAmt;
+        //         }
+        //     }
             
-        }
+        // }
         this.lootAvg.accumulator += amt;
         this.lootAvg.counter += this.battleTime;
         if (this.enemy.level == this.maxEnemyLevel && this.speed == 1){
@@ -3145,10 +3145,10 @@ var autoBattle = {
                 }
             }
         }
-        var topText = prettify(this.dust) + " Dust (" + prettify(dustPs) + " per sec)" + shardText + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + ((this.settings.practice.enabled == 1) ? "<b style='color: #921707'>Practicing</b>" : ((this.enemyLevel == this.maxEnemyLevel) ? "Kill " + (this.nextLevelCount() - this.enemiesKilled) : "Farming")) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enemies Killed: " + this.sessionEnemiesKilled + "&nbsp;" + pctWon + "&nbsp;&nbsp;&nbsp;Fights Lost: " + this.sessionTrimpsKilled + "<br/>Enemy Level " + this.enemy.level + ((this.profile) ? " (" + this.profile + ")" : "") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        var topText = ((this.dust > 0) ? 0 : (prettify(this.dust * -1))) + " Dust needed (" + prettify(dustPs) + " per sec)" + shardText + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + ((this.settings.practice.enabled == 1) ? "<b style='color: #921707'>Practicing</b>" : ((this.enemyLevel == this.maxEnemyLevel) ? "Kill " + (this.nextLevelCount() - this.enemiesKilled) : "Farming")) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enemies Killed: " + this.sessionEnemiesKilled + "&nbsp;" + pctWon + "&nbsp;&nbsp;&nbsp;Fights Lost: " + this.sessionTrimpsKilled + "<br/>Enemy Level " + this.enemy.level + ((this.profile) ? " (" + this.profile + ")" : "") + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
         var buttons = "";
 
-        if (!(updateOnly && statsOnly)) buttons = "<div id='abLevelButtons'><span id='abDecreaseLevel' onclick='autoBattle.levelDown()' class='btn-md btn auto'>- Decrease Enemy Level -</span><span onclick='autoBattle.toggleAutoLevel()' id='abAutoLevel' class='btn btn-md auto'>Set AutoLevel On</span><span onclick='autoBattle.levelUp()' id='abIncreaseLevel' class='btn btn-md auto'>+ Increase Enemy Level +</span><span id='abHelpBtn' onclick='autoBattle.help()' class='icomoon icon-question-circle'></span><span id='abCloseBtn' onclick='cancelTooltip()' class='icomoon icon-close'></span></div>";
+        if (!(updateOnly && statsOnly)) buttons = "<div id='abLevelButtons'><span id='abDecreaseLevel' onclick='autoBattle.levelDown()' class='btn-md btn auto'>- Decrease Enemy Level -</span><span onclick='autoBattle.levelUp()' id='abIncreaseLevel' class='btn btn-md auto'>+ Increase Enemy Level +</span></div>";
         text = "<div class='noselect'><div id='autoDust'>" + topText + "</div>" + buttons + "<div class='autoBattleTopName'>Huffy</div><div class='autoBattleTopName'>Enemy</div>";
         if (updateOnly || itemsOnly) document.getElementById('autoDust').innerHTML = topText;
         var trimpAttackTime = (this.trimp.attackSpeed);
@@ -3156,23 +3156,17 @@ var autoBattle = {
 
         var hpPct = Math.min(100, ((this.trimp.health / this.trimp.maxHealth) * 100)).toFixed(2);
         var EhpPct = Math.min(100, ((this.enemy.health / this.enemy.maxHealth) * 100)).toFixed(2);
-        var atkPct = Math.min(100, ((this.trimp.lastAttack / (trimpAttackTime / 1000)) / 10)).toFixed(2);
-        var EatkPct = Math.min(100, ((this.enemy.lastAttack / (enemyAttackTime / 1000)) / 10)).toFixed(2);
         if ((updateOnly && statsOnly) || itemsOnly){
             document.getElementById('autoBattleTrimpHealthBar').style.width = hpPct + "%";
-            document.getElementById('autoBattleTrimpAttackBar').style.width = atkPct + "%";
             document.getElementById('autoBattleTrimpHealth').innerHTML = prettify(this.trimp.health);
             document.getElementById('autoBattleTrimpHealthMax').innerHTML = prettify(this.trimp.maxHealth);
             document.getElementById('autoBattleEnemyHealthBar').style.width = EhpPct + "%";
-            document.getElementById('autoBattleEnemyAttackBar').style.width = EatkPct + "%";
             document.getElementById('autoBattleEnemyHealth').innerHTML = prettify(this.enemy.health);
             document.getElementById('autoBattleEnemyHealthMax').innerHTML = prettify(this.enemy.maxHealth);
         }
         else{
             text += '<div class="autoBattleBarHolder"><div style="width: ' + hpPct + '%" class="progress-bar percentColorBlue" id="autoBattleTrimpHealthBar" role="progressbar"><span class="noselect innerFightBar"><span id="autoBattleTrimpHealth">' + prettify(this.trimp.health) + '</span>/<span id="autoBattleTrimpHealthMax">' + prettify(this.trimp.maxHealth) + '</span></span></div></div>';
             text += '<div class="autoBattleBarHolder"><div style="width: ' + EhpPct + '%" class="progress-bar rightBar percentColorBlue" id="autoBattleEnemyHealthBar" role="progressbar"><span class="noselect innerFightBar"><span id="autoBattleEnemyHealth">' + prettify(this.enemy.health) + '</span>/<span id="autoBattleEnemyHealthMax">' + prettify(this.enemy.maxHealth) + '</span></span></div></div>';
-            text += '<div class="autoBattleBarHolder"><div style="width: ' + atkPct + '%" class="progress-bar percentColorYellow" id="autoBattleTrimpAttackBar" role="progressbar"><span class="innerFightBar">&nbsp;</span></div></div>';
-            text += '<div class="autoBattleBarHolder"><div style="width: ' + EatkPct + '%" class="progress-bar rightBar percentColorYellow" id="autoBattleEnemyAttackBar" role="progressbar"><span class="innerFightBar">&nbsp;</span></div></div>';
         }
         var statsText = "";
         var things = ["trimp", "enemy"];
@@ -3297,7 +3291,6 @@ var autoBattle = {
                 statsText += "<br/>";
             }
             statsText += "</div>"; 
-    
         }
         if (updateOnly && statsOnly){
             var elem = document.getElementById('autoBattleStatsText');
