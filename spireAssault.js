@@ -6,7 +6,6 @@ var bestSet = {dps: 0, items:[]}
 var trialSet = []
 function parse(){
 	game = JSON.parse(LZString.decompressFromBase64((document.getElementById("saveString").value.replace(/(\r\n|\n|\r|\s)/gm,"") )));
-	console.log(game)
 	autoBattle.load()
 	var itemsList = autoBattle.getItemOrder()
 	autoBattle.autoLevel = false
@@ -18,6 +17,17 @@ function parse(){
 	}
     simulate();
     calcBest();
+
+	for(trait in generator){
+		
+		for(item in generator[trait]){
+			if(autoBattle.items[item] === undefined){
+				console.log(trait)
+				console.log(item)
+			}
+			//console.log(autoBattle.items[item])
+		}
+	}
 }
 function changeBattleCount(){
     battleCount = document.getElementById("battleCounter").value
@@ -31,9 +41,10 @@ function simulate(){
     }
 }
 function calcBest(){
-	efficiencies = new Array(2)
+	efficiencies = new Array(3)
 	efficiencies[0] = new Array(OwnedItems.length)
 	efficiencies[1] = new Array(OwnedItems.length)
+	efficiencies[2] = new Array(1)
     var initdps = autoBattle.getDustPs();
     var BiggestDustPercent = 0;
 	var BiggestShardPercent = 0
@@ -65,6 +76,20 @@ function calcBest(){
 		}
         autoBattle.items[OwnedItems[i].name].level--
     }
+	if(autoBattle.oneTimers.The_Ring.owned){
+		autoBattle.rings.level++
+		simulate();
+		var percent = (autoBattle.getDustPs() - initdps) / autoBattle.getRingLevelCost();
+		if(percent > BiggestShardPercent){
+			efficiencies[2][0] = 1
+			BiggestShardPercent = percent;
+		}
+		else{
+			efficiencies[2][0] = 0
+		}
+		autoBattle.rings.level--
+
+	}
 	for(i = 0, j = 0, k = 0; i < OwnedItems.length; i++){
 		if(OwnedItems[i].dustType === "shards"){
 			efficiencies[0][j] = efficiencies[0][j] / BiggestShardPercent
@@ -149,6 +174,15 @@ function getEfficiency(type, dustNum, shardNum){
 		return (efficiencies[1][dustNum] * 100).toFixed(2)
 	}
 	return (efficiencies[0][shardNum] * 100).toFixed(2)
+}
+function ringBest(item){
+	return autoBattle.getCurrencyName(item) == "Shards" ? (efficiencies[2][0] == 1 ? "<br>Upgrading the ring is more efficient" : "") : ""
+}
+function checkRingEff(){
+	if(efficiencies[2][0] == 1){
+		return ""
+	}
+	return "<br>You're better off upgrading items"
 }
 
 

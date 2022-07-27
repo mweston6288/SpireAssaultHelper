@@ -2943,10 +2943,10 @@ var autoBattle = {
         return amt;
     },
     levelRing: function(){
-        var cost = this.getRingLevelCost();
-        if (this.shards < cost) return;
-        this.saveLastAction("ring", null, cost);
-        this.shards -= cost;
+        //var cost = this.getRingLevelCost();
+        //if (this.shards < cost) return;
+        //this.saveLastAction("ring", null, cost);
+        //this.shards -= cost;
         this.rings.level++;
         var slots = this.getRingSlots();
         if (this.rings.mods.length < slots){
@@ -2954,6 +2954,8 @@ var autoBattle = {
             var randomMod = availableMods[Math.floor(Math.random() * availableMods.length)];
             this.rings.mods.push(randomMod);
         }
+        calcBest();
+
         //this.popup(false, false, true);
     },
     getAvailableRingMods: function(){
@@ -3006,7 +3008,7 @@ var autoBattle = {
             if (this.rings.level < 15) text += "Unlock another slot at Level 15!"
             
         }
-        text += "</div><div class='ringContainer' style='text-align: center; padding-top: 2em;'><span class='btn btn-lg autoItemUpgrade' onclick='autoBattle.levelRing()' style='width: 90%'>Level Up! (" + prettify(this.getRingLevelCost()) + " Shards)</span><br/>";
+        text += "</div><div class='ringContainer' style='text-align: center; padding-top: 2em;'><span class='btn btn-lg autoItemUpgrade' onclick='autoBattle.levelRing()' style='width: 90%'>Level Up! (" + prettify(this.getRingLevelCost()) + " Shards)" + checkRingEff() + "</span><br/>";
         text += "Every level increases stats of all mods on The Ring.<br/>Every 10 levels, gains a bigger boost in power!<br/>"
         if (this.rings.level < 10) text += "Gains status chance starting at Level 10.<br/>" 
         text += "</div>";
@@ -3353,7 +3355,7 @@ var autoBattle = {
                         line2 += "<div class='autoItem autoItemHide' onclick='autoBattle.hide(\"" + item + "\")'>Hide</div>";
                     else if (itemObj.noUpgrade) line2 += "<div class='autoItem autoColorGrey'>Unupgradable</div>"
                     else 
-                        line2 += "<div class='autoItem autoItemUpgrade' onclick='autoBattle.upgrade(\"" + item + "\", false" + ")' onmouseover='autoBattle.hoverItem(\"" + item + "\", true)' style=\"background-color: " + getBGColor(this.getCurrencyName(item), DustItemCount, ShardItemCount) + "\">Upgrade (" + upgradeCost + ")<br>Efficiency: " + getEfficiency(this.getCurrencyName(item), DustItemCount, ShardItemCount) + "%</div>";
+                        line2 += "<div class='autoItem autoItemUpgrade' onclick='autoBattle.upgrade(\"" + item + "\", false" + ")' onmouseover='autoBattle.hoverItem(\"" + item + "\", true)' style=\"background-color: " + getBGColor(this.getCurrencyName(item), DustItemCount, ShardItemCount) + "\">Upgrade (" + upgradeCost + ")<br>Efficiency: " + getEfficiency(this.getCurrencyName(item), DustItemCount, ShardItemCount) + "%" + ringBest(item) +"</div>";
                 }
                 else if (this.popupMode == "hidden")
                     line2 += "<div class='autoItem autoItemRestore' onclick='autoBattle.restore(\"" + item + "\")'>Restore</div>";
