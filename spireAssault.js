@@ -17,7 +17,10 @@ function parse(){
 	}
     simulate();
     calcBest();
-
+	generator.generate();
+}
+function comparator(item, item2, f1, f2){
+	return f1() > f2() ? item : item2
 }
 function changeBattleCount(){
     battleCount = document.getElementById("battleCounter").value

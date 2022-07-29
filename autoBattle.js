@@ -394,18 +394,18 @@ var autoBattle = {
             hidden: false,
             level: 1,
             description: function(){
-                return "-" + prettify((1 - this.trimpAttackSpeed()) * 100) + "% Huffy Attack Time, +" + prettify((1 - this.enemyAttackSpeed()) * -100) + "% Enemy Attack Time.";
+                return "-" + prettify((1 - this.attackSpeed()) * 100) + "% Huffy Attack Time, +" + prettify((1 - this.enemySpeed()) * -100) + "% Enemy Attack Time.";
             },
             upgrade: "-2% Huffy Attack Time, +2% Enemy Attack Time (compounding)",
-            trimpAttackSpeed: function(){
+            attackSpeed: function(){
                 return Math.pow(0.98, this.level);
             },
-            enemyAttackSpeed: function(){ 
+            enemySpeed: function(){ 
                 return 1.05 * Math.pow(1.02, (this.level - 1));
             },
             doStuff: function(){
-                autoBattle.trimp.attackSpeed *= this.trimpAttackSpeed();
-                autoBattle.enemy.attackSpeed *= this.enemyAttackSpeed();
+                autoBattle.trimp.attackSpeed *= this.attackSpeed();
+                autoBattle.enemy.attackSpeed *= this.enemySpeed();
             },
             priceMod: 5
         },
@@ -415,14 +415,14 @@ var autoBattle = {
             hidden: false,
             level: 1,
             description: function(){
-                return "+" + this.effect() + " attack damage.";
+                return "+" + this.attack() + " attack damage.";
             },
             upgrade: "+1 attack damage",
-            effect: function(){
+            attack: function(){
                 return this.level;
             },
             doStuff: function(){
-                autoBattle.trimp.attack += this.effect();
+                autoBattle.trimp.attack += this.attack();
             },
             priceMod: 2.5
         },
@@ -432,14 +432,14 @@ var autoBattle = {
             hidden: false,
             level: 1,
             description: function(){
-                return "+" + prettify(this.effect()) + " base health.";
+                return "+" + prettify(this.health()) + " base health.";
             },
             upgrade: "+20 base health",
-            effect: function(){
+            health: function(){
                 return 20 * this.level;
             },
             doStuff: function(){
-                autoBattle.trimp.maxHealth += this.effect();
+                autoBattle.trimp.maxHealth += this.health();
             },
             priceMod: 5
         },
@@ -478,14 +478,14 @@ var autoBattle = {
             hidden: false,
             level: 1,
             description: function(){
-                return "Can create a Poison on the Enemy for 10 seconds. +" + prettify(this.effect()) + " Poison Damage. +25% Poison Chance, doubled if the enemy is bleeding or shocked."
+                return "Can create a Poison on the Enemy for 10 seconds. +" + prettify(this.poisonMod()) + " Poison Damage. +25% Poison Chance, doubled if the enemy is bleeding or shocked."
             },
             upgrade: "+1 poison damage",
-            effect: function(){
+            poisonMod: function(){
                 return this.level;
             },
             doStuff: function(){
-                autoBattle.trimp.poisonMod += this.effect();
+                autoBattle.trimp.poisonMod += this.poisonMod();
                 autoBattle.trimp.poisonChance += (autoBattle.enemy.shock.time > 0 || autoBattle.enemy.bleed.time > 0) ? 50 : 25;
                 if (autoBattle.trimp.poisonTime < 10000) autoBattle.trimp.poisonTime = 10000;
             },
@@ -518,14 +518,14 @@ var autoBattle = {
             hidden: false,
             level: 1,
             description: function(){
-                return "+" + prettify(this.effect()) + " Defense."
+                return "+" + prettify(this.defense()) + " Defense."
             },
             upgrade: "+1 Defense",
-            effect: function(){
+            defense: function(){
                 return this.level;
             },
             doStuff: function(){
-                autoBattle.trimp.defense += this.effect();
+                autoBattle.trimp.defense += this.defense();
             },
         },
         //unlockables
@@ -540,10 +540,10 @@ var autoBattle = {
             zone: 81,
             description: function(){
                 var stacks = this.poisonStack();
-                return "+50% Poison Chance if the Enemy is not already Poisoned. +" + this.defenseEffect() + " Defense if the Enemy is Poisoned. +" + prettify(this.poisonChance()) + "% Poison Chance. Poisons you inflict can stack " + stacks + " more time" + needAnS(stacks) + ".";
+                return "+50% Poison Chance if the Enemy is not already Poisoned. +" + this.defense() + " Defense if the Enemy is Poisoned. +" + prettify(this.poisonChance()) + "% Poison Chance. Poisons you inflict can stack " + stacks + " more time" + needAnS(stacks) + ".";
             },
             upgrade: "+1 Max Poison Stack per 4 levels. +1 Defense, +4% standard Poison Chance",
-            defenseEffect: function(){
+            defense: function(){
                 return this.level;
             },
             poisonChance: function(){
@@ -554,7 +554,7 @@ var autoBattle = {
                 return 1 + levels;
             },
             doStuff: function(){
-                if (autoBattle.enemy.poison.time > 0) autoBattle.trimp.defense += this.defenseEffect();
+                if (autoBattle.enemy.poison.time > 0) autoBattle.trimp.defense += this.defense();
                 else autoBattle.trimp.poisonChance += 50;
                 autoBattle.trimp.poisonChance += this.poisonChance();
                 autoBattle.trimp.poisonStack += this.poisonStack();
@@ -570,18 +570,18 @@ var autoBattle = {
             level: 1,
             zone: 87,
             description: function(){
-                return "+" + prettify(this.defense()) + " Defense. +" + prettify(this.resistance()) + "% to all Resistances.";
+                return "+" + prettify(this.defense()) + " Defense. +" + prettify(this.resist()) + "% to all Resistances.";
             },
             upgrade: "+2 Defense, +5% Resist",
             defense: function(){
                 return 2 + (this.level * 2);
             },
-            resistance: function(){
+            resist: function(){
                 return (this.level * 5);
             },
             doStuff: function(){
                 autoBattle.trimp.defense += this.defense();
-                var res = this.resistance();
+                var res = this.resist();
                 autoBattle.trimp.bleedResist += res;
                 autoBattle.trimp.poisonResist += res;
                 autoBattle.trimp.shockResist += res;
@@ -615,10 +615,10 @@ var autoBattle = {
             level: 1,
             zone: 95,
             description: function(){
-                return "-" + prettify((1 - this.effect()) * 100) + "% Attack Time and +" + prettify(this.defense()) + " Defense if the Enemy is not Bleeding."
+                return "-" + prettify((1 - this.attackSpeed()) * 100) + "% Attack Time and +" + prettify(this.defense()) + " Defense if the Enemy is not Bleeding."
             },
             upgrade: "-3% Attack Time (compounding), +4 Defense",
-            effect: function(){
+            attackSpeed: function(){
                 return 0.8765 * Math.pow(0.97, this.level);
             },
             defense: function(){
@@ -626,7 +626,7 @@ var autoBattle = {
             },
             doStuff: function(){
                 if (autoBattle.enemy.bleed.time <= 0){
-                    autoBattle.trimp.attackSpeed *= this.effect();
+                    autoBattle.trimp.attackSpeed *= this.attackSpeed();
                     autoBattle.trimp.defense += this.defense();
                 }
             },
@@ -663,10 +663,10 @@ var autoBattle = {
             level: 1,
             zone: 100,
             description: function(){
-                return "+" + prettify(this.effect() * 100) + "% Lifesteal. Huffy's Lifesteal heals twice as much off of Bleed damage.";
+                return "+" + prettify(this.lifesteal() * 100) + "% Lifesteal. Huffy's Lifesteal heals twice as much off of Bleed damage.";
             },
             upgrade: "+5% Lifesteal",
-            effect: function(){
+            lifesteal: function(){
                 return 0.2 + (0.05 * this.level);
             },
             doStuff: function(){
@@ -829,7 +829,7 @@ var autoBattle = {
             level: 1,
             zone: 120,
             description: function(){
-                return "+" + prettify(this.attack()) + " Attack, +" + prettify(this.defense()) + " Defense, +" + prettify(this.health()) + " Health, +" + prettify(this.resists()) + "% to all Resistances.";
+                return "+" + prettify(this.attack()) + " Attack, +" + prettify(this.defense()) + " Defense, +" + prettify(this.health()) + " Health, +" + prettify(this.resist()) + "% to all Resistances.";
             },
             upgrade: "+5 Attack, +50 Health, +4 Defense, +10% Resists",
             attack: function(){
@@ -841,14 +841,14 @@ var autoBattle = {
             health: function(){
                 return 350 + (50 * this.level);
             },
-            resists: function(){
+            resist: function(){
                 return 10 + (10 * this.level);
             },
             doStuff: function(){
                 autoBattle.trimp.attack += this.attack();
                 autoBattle.trimp.defense += this.defense();
                 autoBattle.trimp.maxHealth += this.health();
-                var resists = this.resists();
+                var resists = this.resist();
                 autoBattle.trimp.shockResist += resists;
                 autoBattle.trimp.poisonResist += resists;
                 autoBattle.trimp.bleedResist += resists;
@@ -863,7 +863,7 @@ var autoBattle = {
             level: 1,
             zone: 122,
             description: function(){
-                return "+" + prettify(this.poisonMod()) + " Poison Damage, +1 Max Poison Stack, +" + prettify(this.health()) + " Health, +" + prettify(this.resists()) + "% to all Resistances.";
+                return "+" + prettify(this.poisonMod()) + " Poison Damage, +1 Max Poison Stack, +" + prettify(this.health()) + " Health, +" + prettify(this.resist()) + "% to all Resistances.";
             },
             upgrade: "+3 Poison Damage, +50 Health, +10% Resists",
             poisonMod: function(){
@@ -872,11 +872,11 @@ var autoBattle = {
             health: function(){
                 return 150 + (50 * this.level);
             },
-            resists: function(){
+            resist: function(){
                 return 10 + (10 * this.level);
             },
             doStuff: function(){
-                var resists = this.resists();
+                var resists = this.resist();
                 autoBattle.trimp.shockResist += resists;
                 autoBattle.trimp.poisonResist += resists;
                 autoBattle.trimp.bleedResist += resists;
@@ -949,7 +949,7 @@ var autoBattle = {
             level: 1,
             zone: 130,
             description: function(){
-                return "+" + prettify(this.shockChance()) + "% Shock Chance, +" + prettify(this.shockMod() * 100) + "% Shock Damage, +" + prettify(this.shockResist()) + "% Shock Resist. -" + prettify((1 - this.attackSpeed()) * 100) + "% Attack Time if the Enemy is Shocked. When you Shock an Enemy, they lose all progress towards their attack. +" + prettify(this.attack()) + " Attack for each time you've Shocked this Enemy (up to 10 times).";
+                return "+" + prettify(this.shockChance()) + "% Shock Chance, +" + prettify(this.shockMod() * 100) + "% Shock Damage, +" + prettify(this.resist()) + "% Shock Resist. -" + prettify((1 - this.attackSpeed()) * 100) + "% Attack Time if the Enemy is Shocked. When you Shock an Enemy, they lose all progress towards their attack. +" + prettify(this.attack()) + " Attack for each time you've Shocked this Enemy (up to 10 times).";
             },
             upgrade: "+5% Shock Chance, +5% Shock Damage, -5% Attack Time, +5% Shock Resist, +1 Attack per Shock",
             attackSpeed: function(){
@@ -961,7 +961,7 @@ var autoBattle = {
             shockMod: function(){
                 return .65 + (.1 * this.level);
             },
-            shockResist: function(){
+            resist: function(){
                 return 10 + (5 * this.level);
             },
             attack: function(){
@@ -972,7 +972,7 @@ var autoBattle = {
                 autoBattle.trimp.shockChance += this.shockChance();
                 if (autoBattle.enemy.shock.time >= 0) autoBattle.trimp.attackSpeed *= this.attackSpeed();
                 autoBattle.trimp.attack += (Math.min(10, autoBattle.enemy.shock.count) * this.attack());
-                autoBattle.trimp.shockResist += this.shockResist();
+                autoBattle.trimp.shockResist += this.resist();
             },
             priceMod: 5,
             startPrice: 1000000
@@ -1112,10 +1112,10 @@ var autoBattle = {
             level: 1,
             zone: 143,
             description: function(){
-                return "-" + prettify((1 - this.attackTime()) * 100) + "% Attack Time, +" + prettify(this.attack()) + " Attack, +" + prettify(this.health()) + " Health, +" + prettify(this.lifesteal() * 100) + "% Lifesteal. Your Shocks last a maximum of 10 seconds, and your Bleeds can be reapplied when below 5 seconds.";
+                return "-" + prettify((1 - this.attackSpeed()) * 100) + "% Attack Time, +" + prettify(this.attack()) + " Attack, +" + prettify(this.health()) + " Health, +" + prettify(this.lifesteal() * 100) + "% Lifesteal. Your Shocks last a maximum of 10 seconds, and your Bleeds can be reapplied when below 5 seconds.";
             },
             upgrade: "-5% Attack Time, +5 Attack, +250 Health, +5% Lifesteal",
-            attackTime: function(){
+            attackSpeed: function(){
                 return 0.842 * Math.pow(0.95, this.level);
             },
             attack: function(){
@@ -1128,7 +1128,7 @@ var autoBattle = {
                 return 0.15 + (0.05 * this.level);
             },
             doStuff: function(){
-                autoBattle.trimp.attackSpeed *= this.attackTime();
+                autoBattle.trimp.attackSpeed *= this.attackSpeed();
                 autoBattle.trimp.attack += this.attack();
                 autoBattle.trimp.maxHealth += this.health();
                 autoBattle.trimp.lifesteal += this.lifesteal();
@@ -1355,7 +1355,7 @@ var autoBattle = {
         },
         The_Doomspring:{
             description: function(){
-                var stack = prettify((1 - this.attackTime()) * 100);
+                var stack = prettify((1 - this.attackSpeed()) * 100);
                 return "+" + prettify(this.health()) + " Health, -" + stack + "% Attack Time. For every 15000 damage taken this battle, -" + stack + "% more Attack Time. Stacks up to " + this.stacks() + " times.";
             },
             owned: false,
@@ -1364,7 +1364,7 @@ var autoBattle = {
             level: 1,
             zone: 180,
             upgrade: "-5% Attack Time, +1500 Health, +1 stacks",
-            attackTime: function(){
+            attackSpeed: function(){
                 return 0.842 * Math.pow(0.95, this.level);
             },
             health: function(){
@@ -1377,7 +1377,7 @@ var autoBattle = {
                 var stacks = Math.floor(autoBattle.trimp.dmgTaken / 15000) + 1;
                 var maxStacks = this.stacks();
                 if (stacks > maxStacks) stacks = maxStacks;
-                autoBattle.trimp.attackSpeed *= Math.pow(this.attackTime(), stacks);
+                autoBattle.trimp.attackSpeed *= Math.pow(this.attackSpeed(), stacks);
                 autoBattle.trimp.maxHealth += this.health();
             },
             dustType: "shards",
@@ -1424,13 +1424,13 @@ var autoBattle = {
             level: 1,
             zone: 195,
             description: function(){
-                return "+" + prettify(this.attack()) + " Attack, +" + prettify(this.health()) + " Health, +" + prettify(this.defense()) + " Defense, -" + prettify((1 - this.attackTime()) * 100) + "% Attack Time.";
+                return "+" + prettify(this.attack()) + " Attack, +" + prettify(this.health()) + " Health, +" + prettify(this.defense()) + " Defense, -" + prettify((1 - this.attackSpeed()) * 100) + "% Attack Time.";
             },
             upgrade: "+750 Attack, +2000 Health, +200 Defense, -5% Attack Time",
             attack: function(){
                 return 1250 + (750 * this.level);
             },
-            attackTime: function(){
+            attackSpeed: function(){
                 return 0.842 * Math.pow(0.95, this.level);
             },
             health: function(){
@@ -1442,7 +1442,7 @@ var autoBattle = {
             doStuff: function(){
                 autoBattle.trimp.attack += this.attack();
                 autoBattle.trimp.maxHealth += this.health();
-                autoBattle.trimp.attackSpeed *= this.attackTime();
+                autoBattle.trimp.attackSpeed *= this.attackSpeed();
                 autoBattle.trimp.defense += this.defense();
             },
             dustType: "shards",
@@ -1623,13 +1623,13 @@ var autoBattle = {
             level: 1,
             zone: 90,
             description: function(){
-                return "If you have a chance to cause Poison, gain +" + prettify(this.health()) + " Health, -" + prettify((1 - this.attackTime()) * 100) + "% Attack Time, and +" + prettify(this.poisonMod()) + " Poison Damage.";
+                return "If you have a chance to cause Poison, gain +" + prettify(this.health()) + " Health, -" + prettify((1 - this.attackSpeed()) * 100) + "% Attack Time, and +" + prettify(this.poisonMod()) + " Poison Damage.";
             },
             upgrade: "+25 Health, -1% Attack Time, +1 Poison Damage",
             health: function(){
                 return 25 + (25 * this.level);
             },
-            attackTime: function(){
+            attackSpeed: function(){
                 return Math.pow(0.99, this.level);
             },
             poisonMod: function(){
@@ -1640,7 +1640,7 @@ var autoBattle = {
                 if (autoBattle.items.Sacrificial_Shank.equipped) poisonChance = Math.floor(poisonChance * 0.75);
                 if (poisonChance > autoBattle.enemy.poisonResist && autoBattle.trimp.poisonMod > 0 && autoBattle.trimp.poisonTime > 0){
                     autoBattle.trimp.maxHealth += this.health();
-                    autoBattle.trimp.attackSpeed *= this.attackTime();
+                    autoBattle.trimp.attackSpeed *= this.attackSpeed();
                     autoBattle.trimp.poisonMod += this.poisonMod();
                 }
             },
@@ -1654,10 +1654,10 @@ var autoBattle = {
             level: 1,
             zone: 118,
             description: function(){
-                return "+" + this.defenseEffect() + " Defense. If Huffy's Health % is higher than Enemy Health %, gain +" + prettify(this.shockChance()) + "% Shock Chance, +" + prettify(this.shockMod() * 100) + "% Shock Damage, 15s Shock Time. Otherwise, this item's Defense is doubled and gain +" + prettify(this.lifestealEffect() * 100) + "% Lifesteal.";
+                return "+" + this.defense() + " Defense. If Huffy's Health % is higher than Enemy Health %, gain +" + prettify(this.shockChance()) + "% Shock Chance, +" + prettify(this.shockMod() * 100) + "% Shock Damage, 15s Shock Time. Otherwise, this item's Defense is doubled and gain +" + prettify(this.lifestealEffect() * 100) + "% Lifesteal.";
             },
             upgrade: "+4 Defense, +10% Shock Chance, +10% Shock Damage, +10% Lifesteal",
-            defenseEffect: function(){
+            defense: function(){
                 return 6 + (4 * this.level);
             },
             shockChance: function(){
@@ -1676,11 +1676,11 @@ var autoBattle = {
                     autoBattle.trimp.shockChance += this.shockChance();
                     autoBattle.trimp.shockMod += this.shockMod();
                     if (autoBattle.trimp.shockTime < 15000) autoBattle.trimp.shockTime = 15000;
-                    autoBattle.trimp.defense += this.defenseEffect();
+                    autoBattle.trimp.defense += this.defense();
                 }
                 else{
                     autoBattle.trimp.lifesteal += this.lifestealEffect();
-                    autoBattle.trimp.defense += (this.defenseEffect() * 2);
+                    autoBattle.trimp.defense += (this.defense() * 2);
                 }
             },
             priceMod: 8,
@@ -1694,10 +1694,10 @@ var autoBattle = {
             zone: 145,
             enemyReduced: 0,
             description: function(){
-                return "Multiply Huffy's and the Enemy's highest status effect chance (before resists) by 0.75. -" + prettify((1 - this.attackTime()) * 100) + "% Attack Time, +" + prettify(this.resist()) + " to all Resists, and +" + prettify(this.lifesteal() * 100) + "% Lifesteal per 10% Huffy or Enemy status chance lost.";
+                return "Multiply Huffy's and the Enemy's highest status effect chance (before resists) by 0.75. -" + prettify((1 - this.attackSpeed()) * 100) + "% Attack Time, +" + prettify(this.resist()) + " to all Resists, and +" + prettify(this.lifesteal() * 100) + "% Lifesteal per 10% Huffy or Enemy status chance lost.";
             },
             upgrade: "-1% Attack Time, +1% Resists, +1% Lifesteal per 10% status chance lost",
-            attackTime: function(){
+            attackSpeed: function(){
                 return Math.pow(0.99, this.level);
             },
             resist: function(){
@@ -1744,7 +1744,7 @@ var autoBattle = {
                 }
                 totalReduce = Math.floor(totalReduce / 10);
                 if (totalReduce <= 0) return;
-                autoBattle.trimp.attackSpeed *= Math.pow(this.attackTime(), totalReduce);
+                autoBattle.trimp.attackSpeed *= Math.pow(this.attackSpeed(), totalReduce);
                 autoBattle.trimp.lifesteal += (this.lifesteal() * totalReduce);
                 autoBattle.trimp.poisonResist += (this.resist() * totalReduce);
                 autoBattle.trimp.bleedResist += (this.resist() * totalReduce);
