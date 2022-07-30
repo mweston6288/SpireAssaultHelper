@@ -1,4 +1,8 @@
 var generator = {
+	numEquippable: 0,
+	enemyEffects: [],
+	equipped:[],
+	numEquipped: 0,
 	itemEffects:{
 		attackSpeed:{
 			Menacing_Mask:{},
@@ -252,11 +256,184 @@ var generator = {
 		}
 	},
 	generate: function(){
-		var enemyEffects = this.getEffects();
-		var numEquippable = autoBattle.getMaxItems();
-		var numEquipped = 0;
-		console.log(enemyEffects)
+		enemyEffects = this.getEffects();
+		this.numEquippable = autoBattle.getMaxItems();
 		this.organize();
+		for(item in autoBattle.items){
+			autoBattle.items[item].equipped = false
+		}
+		autoBattle.resetCombat()
+		// check if we're doing a farm or push build
+		// only equip lifegiving gem on farm
+		if(autoBattle.enemyLevel != autoBattle.maxEnemyLevel && autoBattle.items.Lifegiving_Gem.owned){
+			autoBattle.equip("Lifegiving_Gem");
+			this.equipped.push("Lifegiving_Gem");
+			this.numEquipped++
+		}
+		if(this.bleedViable()){}
 
+		autoBattle.popup();
+	},
+	bleedViable: function(){
+		// Priority 1: Make a bleed build
+		// Consider valid if bleed chance > 50%
+		var chance = this.getEffectChance("bleed")
+		if(chance - autoBattle.enemy.bleedResist > 50){
+			this.equipBleedChance(100)
+			// successfully got a 100% bleed build
+			return true;
+		}
+		// Try adding another effect to double Rusty Dagger's chance of applying bleed
+		// Prioritize Poison
+		else if(chance - autoBattle.enemy.bleedResist > 50 - autoBattle.items.Rusty_Dagger.bleedChance() && this.getEffectChance("poison") - autoBattle.enemy.poisonResist > 50){
+			this.equipPoisonChance(50)
+			this.equipBleedChance(100)
+			// Could not get a good bleed/poison build
+			if(this.numEquipped == this.numEquippable && !autoBattle.items.Rusty_Dagger.equipped){
+				this.unequip("bleedChance")
+				this.unequip("poisonChance")
+				return false
+			}
+			return true
+		}
+		// Try adding shock to increase Rusty Dagger's bleed chance
+		else if(chance - autoBattle.enemy.bleedResist > 50 - autoBattle.items.Rusty_Dagger.bleedChance() && this.getEffectChance("shock") - autoBattle.enemy.ShockResist > 50){
+			this.equipShockChance(50)
+			this.equipBleedChance(100)
+			if(this.numEquipped == this.numEquippable && !autoBattle.items.Rusty_Dagger.equipped){
+				this.unequip("bleedChance")
+				this.unequip("poisonChance")
+				return false
+			}
+			return true
+
+		}
+		else
+			return false
+	},
+	getEffectChance: function(type){
+		var chance = 0;
+		if(type == "bleed"){
+			for(item in this.itemEffects.bleedChance){
+				var count = autoBattle.getMaxItems() - this.numEquipped
+				if(autoBattle.items[item].owned){
+					chance += autoBattle.items[item].bleedChance()
+					count--
+				}
+				if (!count){
+					break
+				}
+			}
+			return chance
+		}
+		if(type == "poison"){
+			for(item in this.itemEffects.poisonChance){
+				var count = autoBattle.getMaxItems() - this.numEquipped
+				if(autoBattle.items[item].owned){
+					chance += autoBattle.items[item].poisonChance()
+					count--
+				}
+				if (!count){
+					break
+				}
+			}
+			return chance
+		}	
+		if(type == "shock"){
+			for(item in this.itemEffects.shockChance){
+				var count = autoBattle.getMaxItems() - this.numEquipped
+				if(autoBattle.items[item].owned){
+					chance += autoBattle.items[item].shockChance()
+					count--
+				}
+				if (!count){
+					break
+				}
+			}
+			return chance
+		}	
+	},
+	equipBleedChance: function(percent){
+		if(autoBattle.items.Bag_of_Nails.owned){
+			autoBattle.equip("Bag_of_Nails")
+			this.equipped.push("Bag_of_Nails")
+		}
+		else if(autoBattle.items.Big_Cleaver.owned){
+			autoBattle.equip("Big_Cleaver")
+			this.equipped.push("Big_Cleaver")
+		}
+		else{
+			autoBattle.equip("Rusty_Dagger")
+			this.equipped.push("Rusty_Dagger")
+		}
+		this.numEquipped++
+		for(item in this.itemEffects.bleedChance){
+			if(autoBattle.items[item].owned && !autoBattle.items[item].equipped){
+				autoBattle.equip(item)
+				this.equipped.push(item)
+				this.numEquipped++
+			}
+			if(this.numEquipped == this.numEquippable){
+				return
+			}
+			if(autoBattle.trimp.bleedChance - autoBattle.enemy.bleedResist >= percent){
+				return
+			}
+		}
+	},
+	equipPoisonChance: function(percent){
+		if(autoBattle.items.Very_Large_Slime.owned){
+			autoBattle.equip("Very_Large_Slime")
+		}
+		else if(autoBattle.items.Tame_Snimp.owned){
+			autoBattle.equip("Tame_Snimp")
+		}
+		else{
+			autoBattle.equip("Fists_of_Goo")
+		}
+		this.numEquipped++
+		for(item in this.itemEffects.poisonChance){
+			if(autoBattle.items[item].owned && !autoBattle.items[item].equipped){
+				autoBattle.equip(item)
+				this.equipped.push(item)
+				this.numEquipped++
+			}
+			if(this.numEquipped == this.numEquippable){
+				return
+			}
+			if(autoBattle.trimp.poisonChance - autoBattle.enemy.poisonResist >= percent){
+				return
+			}
+		}
+	},
+	equipShockChance: function (percent){
+		if(autoBattle.items.Shock_and_Awl.owned){
+			autoBattle.equip("Shock_and_Awl")
+		}
+		else{
+			autoBattle.equip("Battery_stick")
+		}
+		this.numEquipped++
+		for(item in this.itemEffects.shockChance){
+			if(autoBattle.items[item].owned && !autoBattle.items[item].equipped){
+				autoBattle.equip(item)
+				this.equipped.push(item)
+				this.numEquipped++
+			}
+			if(this.numEquipped == this.numEquippable){
+				return
+			}
+			if(autoBattle.trimp.shockChance - autoBattle.enemy.ShockResist >= percent){
+				return
+			}
+		}		
+	},
+	unequip: function(type){
+		console.log(this.equipped)
+		while(this.itemEffects[type][this.equipped[this.equipped.length - 1]]){
+			autoBattle.equip(this.equipped.pop())
+			this.numEquipped--
+		}
 	}
+
 }

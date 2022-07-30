@@ -481,6 +481,9 @@ var autoBattle = {
                 return "Can create a Poison on the Enemy for 10 seconds. +" + prettify(this.poisonMod()) + " Poison Damage. +25% Poison Chance, doubled if the enemy is bleeding or shocked."
             },
             upgrade: "+1 poison damage",
+            poisonChance:function(){
+                return 25
+            },
             poisonMod: function(){
                 return this.level;
             },
@@ -503,6 +506,9 @@ var autoBattle = {
             upgrade: "+10% Shock Damage",
             shockMod: function(){
                 return 0.15 + (0.1 * this.level);
+            },
+            shockChance:function(){
+                return 25
             },
             doStuff: function(){
                 autoBattle.trimp.shockChance += (autoBattle.enemy.bleed.time > 0 || autoBattle.enemy.poison.time > 0) ? 70 : 35;
@@ -995,6 +1001,9 @@ var autoBattle = {
             },
             health: function(){
                 return 500 + (100 * this.level);
+            },
+            bleedChance: function(){
+                return 100;
             },
             doStuff: function(){
                 if (autoBattle.enemy.health == autoBattle.enemy.maxHealth) autoBattle.trimp.bleedChance += 100;
@@ -1560,6 +1569,9 @@ var autoBattle = {
                 return "-10% Attack Time and +" + prettify(this.defense()) + " Defense if the Enemy is Poisoned. Causes Poisons you generate from other items to last at least " + prettify(this.poisonTime() / 1000) + " seconds. +" + prettify(this.poisonChance()) + "% Poison Chance.";
             },
             upgrade: "+1s Poison Duration, +6% Poison Chance, +3 Defense",
+            attackSpeed: function(){
+                return 10
+            },
             poisonTime: function(){
                 return 19000 + (this.level * 1000);
             },
@@ -2613,7 +2625,7 @@ var autoBattle = {
         swapClass('abTab', 'abTabNone', document.getElementById('autoBattleTab'));
     },
     //popup stuff
-    equip: function(item){
+    equip: function(item, bypass){
         var itemObj = this.items[item];
         if (!itemObj.equipped){
             var count = this.countEquippedItems();
@@ -2627,7 +2639,8 @@ var autoBattle = {
         if (itemObj.hidden) this.restore(item);
         this.resetCombat(true);
         ////this.popup(true);
-		calcBest();
+		if(bypass) return;
+        calcBest();
     },
     countEquippedItems: function(){
         var count = 0;

@@ -1,7 +1,7 @@
 var game
 var OwnedItems;
 var efficiencies;
-var battleCount = 200;
+var battleCount = 50;
 var bestSet = {dps: 0, items:[]}
 var trialSet = []
 function parse(){
@@ -17,7 +17,6 @@ function parse(){
 	}
     simulate();
     calcBest();
-	generator.generate();
 }
 function comparator(item, item2, f1, f2){
 	return f1() > f2() ? item : item2
@@ -105,7 +104,7 @@ function searchForBetter(){
     var equipped = [];
     var bestdps = autoBattle.getDustPs()
     for(item in OwnedItems){
-        if(autoBattle.items[OwnedItems[item]].equipped)
+        if(autoBattle.items[OwnedItems[item].name].equipped)
         equipped.push(OwnedItems[item])
     }
     var perm = Array(OwnedItems.length)
@@ -115,7 +114,7 @@ function searchForBetter(){
     for(var j = 0; j < 100; j++){
 
         for(item in OwnedItems){
-            autoBattle.items[OwnedItems[item]].equipped = false
+            autoBattle.items[OwnedItems[item].name].equipped = false
         }
         for(var i = autoBattle.getMaxItems() - 1; i >= 0; i--){
             var rand = Math.floor(Math.random() * OwnedItems.length)
@@ -124,23 +123,23 @@ function searchForBetter(){
             perm[rand] = temp
         }
         for(var i = autoBattle.getMaxItems() - 1; i >= 0; i--){
-            autoBattle.items[OwnedItems[perm[perm.length - 1 - i]]].equipped = true
+            autoBattle.items[OwnedItems[perm[perm.length - 1 - i]].name].equipped = true
         }
         simulate();
         if (autoBattle.getDustPs() > bestdps){
             bestdps = autoBattle.getDustPs()
             equipped = []
             for(item in OwnedItems){
-                if(autoBattle.items[OwnedItems[item]].equipped)
+                if(autoBattle.items[OwnedItems[item].name].equipped)
                 equipped.push(OwnedItems[item])
             }
         }
     }
     for(item in OwnedItems){
-        autoBattle.items[OwnedItems[item]].equipped = false
+        autoBattle.items[OwnedItems[item].name].equipped = false
     }
     for(item in equipped){
-        autoBattle.items[equipped[item]].equipped = true
+        autoBattle.items[equipped[item].name].equipped = true
     }
     calcBest()
     simulate()
@@ -176,6 +175,28 @@ function checkRingEff(){
 		return ""
 	}
 	return "<br>You're better off upgrading items"
+}
+function reset(){
+	autoBattle.resetAll()
+	var itemsList = autoBattle.getItemOrder()
+	autoBattle.autoLevel = false
+	OwnedItems = []
+	for(item in itemsList){
+        if(autoBattle.items[itemsList[item].name].owned){
+			OwnedItems.push(itemsList[item]);
+		}
+	}
+    simulate();
+    calcBest();	
+}
+function unlockNextItem(){
+	var items = autoBattle.getItemOrder();
+	for(item in items){
+		if (!autoBattle.items[item.name].owned){
+			autoBattle.items[item.name].owned = true
+			OwnedItems.push(items[item])
+		}
+	}
 }
 
 
